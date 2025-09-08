@@ -45,7 +45,7 @@ services:
 
 
 
-  test_clinet:
+  test_client:
     container_name: test_client
     build: 
       context: ./test
