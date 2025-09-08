@@ -1,0 +1,43 @@
+name: Test and Deploy
+
+on: [push]
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Test
+        run: |
+          docker compose up -d
+          sleep 30
+          docker compose run --rm test_client python test.py > test_output.log 2>&1
+          TEST_OUTPUT=$(cat test_output.log)
+          echo "Test output: $TEST_OUTPUT"
+
+          if [ "$TEST_OUTPUT" = "0" ]; then
+            echo "✅ SUCCESS: Test passed - output is 0"
+            # יצירת קובץ סיגנל שישמש את הסקריפט המקומי
+            echo "success" > success_signal.txt
+          else
+            echo "❌ FAILED: Test failed - output is $TEST_OUTPUT"
+            docker compose down
+            exit 1
+          fi
+          docker compose down
+
+      - name: Login and Push
+        if: success()
+        run: |
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          VERSION="0.${{ github.run_number }}"
+          docker build -t $DOCKER_USERNAME/flasktodo-main:$VERSION .
+          docker build -t $DOCKER_USERNAME/flasktodo-main:latest .
+          docker push $DOCKER_USERNAME/flasktodo-main:$VERSION
+          docker push $DOCKER_USERNAME/flasktodo-main:latest
