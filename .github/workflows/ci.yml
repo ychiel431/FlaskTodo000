@@ -13,31 +13,42 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Run Test
+      # שלב הרצת הטסטים
+      - name: Run Tests
         run: |
           docker compose up -d
           sleep 30
-          docker compose run --rm test_client python test.py > test_output.log 2>&1
-          TEST_OUTPUT=$(cat test_output.log)
-          echo "Test output: $TEST_OUTPUT"
-
-          if [ "$TEST_OUTPUT" = "0" ]; then
-            echo "✅ SUCCESS: Test passed - output is 0"
-            # יצירת קובץ סיגנל שישמש את הסקריפט המקומי
-            echo "success" > success_signal.txt
-          else
-            echo "❌ FAILED: Test failed - output is $TEST_OUTPUT"
-            docker compose down
-            exit 1
-          fi
+          docker compose run --rm test_client python test.py
+          TEST_EXIT_CODE=$?
           docker compose down
 
+          if [ "$TEST_EXIT_CODE" -eq 0 ]; then
+            echo "✅ SUCCESS: Tests passed!"
+            # יצירת קובץ סיגנל ל-Celebrate.py
+            echo "success" > success_signal.txt
+          else
+            echo "❌ FAILED: Tests failed with exit code $TEST_EXIT_CODE"
+            exit 1
+
+      # שלב התחברות ל-Docker Hub ודחיפה
       - name: Login and Push
         if: success()
         run: |
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          VERSION="0.${{ github.run_number }}"
-          docker build -t $DOCKER_USERNAME/flasktodo-main:$VERSION .
-          docker build -t $DOCKER_USERNAME/flasktodo-main:latest .
-          docker push $DOCKER_USERNAME/flasktodo-main:$VERSION
-          docker push $DOCKER_USERNAME/flasktodo-main:latest
+
+          # יצירת גרסה חדשה בהתאם למספר הריצה
+          BASE_RUN=13
+          NEW_VERSION=$((${{ github.run_number }} - $BASE_RUN + 1))
+          VERSION="0.$NEW_VERSION"
+
+          echo "Building version: $VERSION (run #${{ github.run_number }})"
+
+          # בנייה ודחיפה של Docker Image
+          docker build -t $DOCKER_USERNAME/task-todo-app:$VERSION .
+          docker build -t $DOCKER_USERNAME/task-todo-app:latest .
+          docker push $DOCKER_USERNAME/task-todo-app:$VERSION
+          docker push $DOCKER_USERNAME/task-todo-app:latest
+
+          echo "✅ Docker image uploaded!"
+          echo "✅ Version: $VERSION"
+          echo "✅ Latest tag updated"
