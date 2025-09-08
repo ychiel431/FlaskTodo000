@@ -1,55 +1,53 @@
 name: Test and Deploy
 
-on: [push, pull_request]
+on: [push]
 
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
 jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Run Test
-      run: |
-        docker compose up -d
-        sleep 30
-        
-        # הרצת הבדיקה ושמירת הלוג
-        TEST_OUTPUT=$(docker compose run --rm test_client python test.py)
-        echo "Test output: $TEST_OUTPUT"
-        
-        # בדיקה אם הלוג הוא 0 (הצלחה) או 1 (כישלון)
-        if [ "$TEST_OUTPUT" = "0" ]; then
-          echo "✅ SUCCESS: Test passed - output is 0"
-        else
-          echo "❌ FAILED: Test failed - output is $TEST_OUTPUT (expected 0)"
+      - uses: actions/checkout@v3
+
+      - name: Run Test
+        run: |
+          docker compose up -d
+          sleep 30
+
+          # הרצת הבדיקה ושמירת הלוג
+          TEST_OUTPUT=$(docker compose run --rm test_client python test.py)
+          echo "Test output: $TEST_OUTPUT"
+
+          # בדיקה אם הלוג הוא 0 (הצלחה) או 1 (כישלון)
+          if [ "$TEST_OUTPUT" = "0" ]; then
+            echo "✅ SUCCESS: Test passed - output is 0"
+          else
+            echo "❌ FAILED: Test failed - output is $TEST_OUTPUT (expected 0)"
+            docker compose down
+            exit 1
+          fi
+
           docker compose down
-          exit 1
-        fi
-        
-        docker compose down
-    
-    - name: Login and Push
-      if: success()
-      run: |
-        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        
-        # יצירת גרסה חדשה - ספירה מחדש מעכשיו
-        BASE_RUN=13  # הrun הנוכחי שממנו מתחילים מחדש
-        NEW_VERSION=$((${{ github.run_number }} - $BASE_RUN + 1))
-        VERSION="0.$NEW_VERSION"
-        echo "Building version: $VERSION (run #${{ github.run_number }})"
-        
-        # בניה ודחיפה עם גרסה ספציפית
-        docker build -t $DOCKER_USERNAME/task-todo-app:$VERSION .
-        docker build -t $DOCKER_USERNAME/task-todo-app:latest .
-        
-        docker push $DOCKER_USERNAME/task-todo-app:$VERSION
-        docker push $DOCKER_USERNAME/task-todo-app:latest
-        
-        echo "✅ DONE - Image uploaded to Docker Hub!"
-        echo "✅ Version: $VERSION"
-        echo "✅ Latest tag also updated"
+
+      - name: Login and Push
+        if: success()
+        run: |
+          echo "$dckr_pat_6khX4K5q3NDYawdXjhyhe_JknMA" | docker login -u "$ychiel" --password-stdin
+
+          # יצירת גרסה חדשה - ספירה מחדש מעכשיו
+          BASE_RUN=13  # הrun הנוכחי שממנו מתחילים מחדש
+          NEW_VERSION=$((${{ github.run_number }} - $BASE_RUN + 1))
+          VERSION="0.$NEW_VERSION"
+          echo "Building version: $VERSION (run #${{ github.run_number }})"
+
+          # בניה ודחיפה עם גרסה ספציפית
+          docker build -t $ychiel/task-todo-app:$VERSION .
+          docker build -t $ychiel/task-todo-app:latest .
+
+          docker push $ychiel/task-todo-app:$VERSION
+          docker push $ychiel/task-todo-app:latest
+
+          echo "✅ DONE - Image uploaded to Docker Hub!"
+          echo "✅ Version: $VERSION"
+          echo "✅ Latest tag also updated"
