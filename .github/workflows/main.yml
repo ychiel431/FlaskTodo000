@@ -2,6 +2,9 @@ name: Test and Deploy
 
 on: [push]
 
+env:
+  DOCKER_USERNAME: ychiel
+  DOCKER_PASSWORD: dckr_pat_6khX4K5q3NDYawdXjhyhe_JknMA
 
 jobs:
   test-and-deploy:
@@ -33,7 +36,7 @@ jobs:
       - name: Login and Push
         if: success()
         run: |
-          echo "$dckr_pat_6khX4K5q3NDYawdXjhyhe_JknMA" | docker login -u "$ychiel" --password-stdin
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
           # יצירת גרסה חדשה - ספירה מחדש מעכשיו
           BASE_RUN=13  # הrun הנוכחי שממנו מתחילים מחדש
@@ -42,11 +45,11 @@ jobs:
           echo "Building version: $VERSION (run #${{ github.run_number }})"
 
           # בניה ודחיפה עם גרסה ספציפית
-          docker build -t $ychiel/task-todo-app:$VERSION .
-          docker build -t $ychiel/task-todo-app:latest .
+          docker build -t $DOCKER_USERNAME/flasktodo-main:$VERSION .
+          docker build -t $DOCKER_USERNAME/flasktodo-main:latest .
 
-          docker push $ychiel/task-todo-app:$VERSION
-          docker push $ychiel/task-todo-app:latest
+          docker push $DOCKER_USERNAME/flasktodo-main:$VERSION
+          docker push $DOCKER_USERNAME/flasktodo-main:latest
 
           echo "✅ DONE - Image uploaded to Docker Hub!"
           echo "✅ Version: $VERSION"
