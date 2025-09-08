@@ -3,8 +3,8 @@ name: Test and Deploy
 on: [push]
 
 env:
-  DOCKER_USERNAME: ychiel
-  DOCKER_PASSWORD: dckr_pat_A8s6P3xjMZuzfVmNhsuMyUm4P5k
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
