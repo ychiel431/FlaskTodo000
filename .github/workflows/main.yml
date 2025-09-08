@@ -42,7 +42,7 @@ jobs:
           BASE_RUN=13  # הrun הנוכחי שממנו מתחילים מחדש
           NEW_VERSION=$((${{ github.run_number }} - $BASE_RUN + 1))
           VERSION="0.$NEW_VERSION"
-          echo "Building version: $VERSION (run #${{ github.run_number }})"
+          echo "Building version: $VERSION (run #${{ github.run_number }})" 
 
           # בניה ודחיפה עם גרסה ספציפית
           docker build -t $DOCKER_USERNAME/flasktodo-main:$VERSION .
