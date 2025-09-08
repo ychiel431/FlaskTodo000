@@ -3,10 +3,8 @@ name: Test and Deploy
 on: [push]
 
 env:
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
+  DOCKER_USERNAME: ychiel
+  DOCKER_PASSWORD: dckr_pat_A8s6P3xjMZuzfVmNhsuMyUm4P5k
 jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
@@ -20,7 +18,7 @@ jobs:
           sleep 30
 
           # הרצת הבדיקה ושמירת הלוג
-          TEST_OUTPUT=$(docker compose run --rm test_client python server_test.py)
+          TEST_OUTPUT=$(docker compose run --rm test_client python test.py)
           echo "Test output: $TEST_OUTPUT"
 
           # בדיקה אם הלוג הוא 0 (הצלחה) או 1 (כישלון)
@@ -55,3 +53,4 @@ jobs:
           echo "✅ DONE - Image uploaded to Docker Hub!"
           echo "✅ Version: $VERSION"
           echo "✅ Latest tag also updated"
+
