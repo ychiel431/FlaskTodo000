@@ -15,10 +15,9 @@ duration_seconds = 5
 print("🎉 Celebrate.py מאזין כל הזמן לסיגנלים מ-GitHub...")
 
 # -----------------------------
-# פונקציות עזר
+# פונקציה לקבלת פרטי commit אחרון
 # -----------------------------
 def get_latest_commit_info():
-    """מחזיר את ה-hash וההודעה של ה-commit האחרון"""
     try:
         commit_hash = subprocess.check_output(
             ["git", "-C", repo_path, "rev-parse", "--short", "HEAD"],
@@ -34,14 +33,14 @@ def get_latest_commit_info():
         ).strip()
         return branch_name, commit_hash, commit_msg
     except Exception as e:
-        return "unknown", "unknown", f"Error getting commit info: {e}"
+        return "unknown", "unknown", f"Error: {e}"
 
 # -----------------------------
 # לולאה אינסופית
 # -----------------------------
 while True:
     try:
-        # מושך את כל השינויים מ-GitHub
+        # מושך שינויים מה‑GitHub
         subprocess.run(
             ["git", "-C", repo_path, "pull"],
             check=True,
@@ -51,7 +50,7 @@ while True:
     except Exception as e:
         print(f"⚠️ שגיאת git pull: {e}")
 
-    # בודק אם קובץ הסיגנל קיים
+    # בדיקה אם קובץ הסיגנל קיים
     signal_path = os.path.join(repo_path, signal_file)
     if os.path.exists(signal_path):
         branch, commit_hash, commit_msg = get_latest_commit_info()
@@ -60,7 +59,7 @@ while True:
         # השמעת הצליל
         winsound.PlaySound(sound_file, winsound.SND_FILENAME | winsound.SND_ASYNC)
 
-        # הודעה קופצת עם פרטי ה-commit
+        # הודעה קופצת
         notification.notify(
             title=f"🎉 Workflow הצליח! ({branch})",
             message=f"Commit {commit_hash}: {commit_msg}\nCelebrate.py מפעיל צליל 🎶",
