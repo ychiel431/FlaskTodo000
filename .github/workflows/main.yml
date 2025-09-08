@@ -4,7 +4,7 @@ on: [push]
 
 env:
   DOCKER_USERNAME: ychiel
-  DOCKER_PASSWORD: dckr_pat_6khX4K5q3NDYawdXjhyhe_JknMA
+  DOCKER_PASSWORD: dckr_pat_IuIk5BWef4kv83FmPyoaOlM_dI0
 
 jobs:
   test-and-deploy:
